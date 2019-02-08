@@ -6,9 +6,11 @@ class fichier(object):
     def ecrire(self, html):
         self.html += html + "\n"
 
+    def remplacer(self, html):
+        self.html = html
+
     def reset(self):
         self.html=""
 
     def ret_html(self):
-        print(self.html)
         return self.html

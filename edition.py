@@ -38,8 +38,43 @@ def ajout_div_fun(w, h, color, div, draw, html, fenetre, top, tag, left):
     else:
         messagebox.showwarning("Error", "You need to insert an id")
 
+def edit(w, h, top, left, tag, draw, color, fenetre, html, menu):
+    color_value = color.ret_color()
+    print(tag)
+    print(color_value)
+    if top.get() == "":
+        top = 0
+    else:
+        top = top.get()
+    if left.get() == "":
+        left = 0
+    else:
+        left = left.get()
+    if color_value == None:
+        color_value = "#FFFFFF"
+    if tag != "":
+        if w.get().isdigit():
+            if float(w.get()) != 0:
+                if h.get().isdigit():
+                    if float(h.get()) != 0:
+                        draw.delete(tag)
+                        if tag != "menu_bar_ew":
+                            edit_ajout_div_princ(draw, html, (w.get()), (h.get()), color_value, fenetre, top, tag, left)
+                            html.ret_html()
+                        else:
+                            edit_ajout_menu(draw, menu, (w.get()), (h.get()), color_value, fenetre, top, tag, left)
+                    else:
+                        messagebox.showwarning("Error","Height can't be egal to 0") 
+                else:
+                    messagebox.showwarning("Error", "You need to insert a integer")
+            else:
+                messagebox.showwarning("Error","Weight can't be egal to 0") 
+        else:
+            messagebox.showwarning("Error", "You need to insert a integer")
+    else:
+        messagebox.showwarning("Error", "You need to insert an id")
+
 def ajout_div(fenetre, draw, fichier, html):
-    print(fichier)
     color = selcolor()
     if fichier != "":
         div = Toplevel(fenetre)
@@ -85,10 +120,26 @@ def ajout_div(fenetre, draw, fichier, html):
     else:
         messagebox.showwarning("Error", "You need to open a file")
 
-def ajout_div_princ(div, draw, html, w, h, color, fenetre, top, tag, left):
+def edit_ajout_menu(draw, menu, w, h, color, fenetre, top, tag, left):
+    draw.create_rectangle("0", "0", fenetre.winfo_screenwidth()*0.6, fenetre.winfo_screenheight()*(float(h)/100), fill=color, tags="menu_bar_ew")
+    html_val = menu.ret_menu()
+    print(html_val)
+    print(tag)
+    avant = re.findall('<div id="{0}" style="(.*)">'.format(tag), html_val)[0]
+    apres = "position:absolute;width:{0};background:{1};height:52px;".format(w, color)
+    html_val = html_val.replace(avant, apres)
+    menu.remplacer(html_val)
+    
+def edit_ajout_div_princ(draw, html, w, h, color, fenetre, top, tag, left):
+    draw.create_rectangle(fenetre.winfo_screenwidth()*0.6*(float(left)/100), fenetre.winfo_screenheight()*(float(top)/100), fenetre.winfo_screenwidth()*0.6*(float(left)/100) + fenetre.winfo_screenwidth()*0.6*(float(w)/100), fenetre.winfo_screenheight()*(float(top)/100)+fenetre.winfo_screenheight()*(float(h)/100), fill=color, tags=tag)
+    html_val = html.ret_html()
+    avant = re.findall('<div id="{0}" style="(.*)">'.format(tag), html_val)[0]
+    apres = "width:{0}%;background:{1};height:{2}%;position:absolute;top:{3}%;left:{4}%".format(w, color, h, top, left)
+    html_val = html_val.replace(avant, apres)
+    html.remplacer(html_val)
 
-    # ajouter margin left
+def ajout_div_princ(div, draw, html, w, h, color, fenetre, top, tag, left):
     div.destroy()
     draw.create_rectangle(fenetre.winfo_screenwidth()*0.6*(float(left)/100), fenetre.winfo_screenheight()*(float(top)/100), fenetre.winfo_screenwidth()*0.6*(float(left)/100) + fenetre.winfo_screenwidth()*0.6*(float(w)/100), fenetre.winfo_screenheight()*(float(top)/100)+fenetre.winfo_screenheight()*(float(h)/100), fill=color, tags=tag)
-    html_val = "<div id=\"{0}\" style=\"width:{1}%;background:{2};height:{3}%;position:absolute;top:{4}%\"></div>\n".format(tag, w, color, h, top)
+    html_val = "<div id=\"{0}\" style=\"width:{1}%;background:{2};height:{3}%;position:absolute;top:{4}%;left:{5}%\"></div>\n".format(tag, w, color, h, top, left)
     html.ecrire(html_val)

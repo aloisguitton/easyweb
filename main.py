@@ -3,6 +3,7 @@ from tkinter.filedialog import *
 from tkinter import tix
 from edition import *
 from fichier import *
+from menu import *
 from parse_html import *
 from aff_prop import *
 from os import walk
@@ -20,6 +21,8 @@ class Main(object):
 
         self.fichier_ouvert=""
         self.html = fichier()
+        self.html_menu = menu()
+        self.cd = "./"
         
         self.paned = PanedWindow(fenetre, orient=HORIZONTAL)
 
@@ -40,8 +43,6 @@ class Main(object):
         self.paned.add(self.prop_pan)
         self.showdir
 
-        
-
     def menu(self):
         self.menu = Menu(fenetre)
         self.filemenu = Menu(self.menu, tearoff=0)
@@ -50,16 +51,32 @@ class Main(object):
         self.filemenu.add_command(label="Sauvegarder", command=self.sauvegarder)
         self.menu.add_cascade(label="Fichier", menu=self.filemenu)
 
+        self.menu.add_command(label="Menu", command=partial(self.sel_menu))
+        self.menu.add_command(label="aff menu", command=partial(self.html_menu.ret_menu))
+
         self.addmenu = Menu(self.menu, tearoff=0)
         self.addmenu.add_command(label="Ajouter un conteneur", command=partial(ajout_div, fenetre, (self.draw), (self.fichier_ouvert), (self.html)))
         self.menu.add_cascade(label="Ajouter", menu=self.addmenu)
         fenetre.config(menu=self.menu)  
   
     def sauvegarder(self):
-        nouveau_code = self.html.ret_html()
-        codehtml = open(self.fichier_ouvert, "w")
-        codehtml.write(nouveau_code)
-        codehtml.close()
+        if self.fichier_ouvert != "":
+            nouveau_code = self.html.ret_html() + "</body>\n</html>"
+            codehtml = open(self.fichier_ouvert, "w")
+            codehtml.write(nouveau_code)
+            codehtml.close()
+        codemenu = open("menu.ew", "w")
+        codemenu.write(self.html_menu.ret_menu())
+        codemenu.close()
+
+    def sel_fich(self, fichier):
+        self.fichier_ouvert=fichier
+        parse(fichier, (self.draw), fenetre, self.html)
+        self.addmenu.entryconfigure(1, command=partial(ajout_div, fenetre, (self.draw), (self.fichier_ouvert), (self.html)))
+    
+    def sel_menu(self):
+        parse_menu(self.html_menu, (self.draw), fenetre)
+        self.fichier_ouvert = "menu.ew"
 
     def tree(self):
         self.arbor = Frame(self.paned, bg="white", borderwidth=2, relief=GROOVE)
@@ -77,10 +94,12 @@ class Main(object):
         for x in os.listdir("./"):
             if x.endswith(".html") or x.endswith(".txt"):
                 but = Button(self.frame_liste_fichier, text=x, bg="yellow")
-                but.configure(command=partial(parse, "./"+x, (self.draw), fenetre, self.html))
-                self.fichier_ouvert="./"+x
+                but.configure(command=partial(self.sel_fich, "./"+x))
+                
                 x = self.html.ret_html()
                 but.pack()
+
+        self.ajout = Button(self.arbor, text="Créer une nouvelle page", command=partial(self.nom_fichier)).pack(side=BOTTOM)
         
         self.frame_liste_fichier.pack()
 
@@ -98,7 +117,7 @@ class Main(object):
        
         #try sur clic dans fenetre pour savoir si clic sur un div par exemple
         #try:
-        afficher(self.prop_pan, self.draw, fenetre)
+        afficher(self.prop_pan, self.draw, fenetre, self.draw, self.html, self.html_menu)
         #except:
         #    print("error")
         
@@ -141,11 +160,12 @@ class Main(object):
         for widget in self.frame_liste_fichier.winfo_children():
             widget.destroy()
 
+        self.cd=directory
+        
         for x in os.listdir(directory):
             if x.endswith(".html") or x.endswith(".txt"):
                 but = Button(self.frame_liste_fichier, text=x, bg="yellow")
-                but.configure(command=partial(parse, directory+"/"+x, (self.draw), fenetre, self.html))
-                self.fichier_ouvert=directory+"/"+x
+                but.configure(command=partial(self.sel_fich, directory+"/"+x))
                 but.pack()
         self.frame_liste_fichier.pack()
 
@@ -159,6 +179,40 @@ class Main(object):
         self.fichier_ouvert=fichier
         self.addmenu.entryconfigure(1, command=partial(ajout_div, fenetre, (self.draw), (self.fichier_ouvert), (self.html)))
 
+    def nom_fichier(self):
+        div = Toplevel(fenetre)
+        frame = Frame(div)
+        frame.pack()
+        L1 = Label(frame, text="Nom de la page")
+        L1.pack( side = LEFT)
+        nom = Entry(frame, bd =5)
+        nom.pack(side = RIGHT)
+        Button(div, text="Créer", command=partial(self.generer_fichier, nom, div)).pack()
+
+    def generer_fichier(self, nom, div):
+        nom = nom.get()
+        if nom != "":
+            nom_page = nom
+            nom = self.cd + "/" + nom + ".html"
+            html = """<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8" />
+            <title>{0}</title>
+        </head>
+
+        <body>
+        </body>
+        </html>
+                """.format(nom_page)
+            codehtml = open(nom, "w")
+            codehtml.write(html)
+            codehtml.close()
+            div.destroy()
+            self.showdir((self.cd))
+        else:
+            messagebox.showwarning("Error", "You need to insert an name")
+        
 fenetre = tix.Tk()
 app= Main(fenetre)
 fenetre.mainloop()
