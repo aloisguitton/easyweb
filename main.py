@@ -1,3 +1,4 @@
+# coding=utf-8
 from tkinter import *
 from tkinter.filedialog import *
 from tkinter import tix
@@ -19,11 +20,12 @@ class Main(object):
 
         fenetre.geometry("{0}x{1}+0+0".format(fenetre.winfo_screenwidth(), fenetre.winfo_screenheight()))
 
+        self.directory=""
         self.fichier_ouvert=""
         self.html = fichier()
         self.html_menu = menu()
         self.cd = "./"
-        
+
         self.paned = PanedWindow(fenetre, orient=HORIZONTAL)
 
         self.prin_pan = Frame(self.paned, bg="blue")
@@ -38,7 +40,7 @@ class Main(object):
         self.propriete()
         self.menu()
 
-        
+
 
         self.paned.add(self.prop_pan)
         self.showdir
@@ -57,8 +59,8 @@ class Main(object):
         self.addmenu = Menu(self.menu, tearoff=0)
         self.addmenu.add_command(label="Ajouter un conteneur", command=partial(ajout_div, fenetre, (self.draw), (self.fichier_ouvert), (self.html)))
         self.menu.add_cascade(label="Ajouter", menu=self.addmenu)
-        fenetre.config(menu=self.menu)  
-  
+        fenetre.config(menu=self.menu)
+
     def sauvegarder(self):
         if self.fichier_ouvert != "":
             nouveau_code = self.html.ret_html() + "</body>\n</html>"
@@ -73,34 +75,40 @@ class Main(object):
         self.fichier_ouvert=fichier
         parse(fichier, (self.draw), fenetre, self.html)
         self.addmenu.entryconfigure(1, command=partial(ajout_div, fenetre, (self.draw), (self.fichier_ouvert), (self.html)))
-    
+
     def sel_menu(self):
         parse_menu(self.html_menu, (self.draw), fenetre)
         self.fichier_ouvert = "menu.ew"
+
+    def sel_dossier(self):
+        self.directory = filedialog.askdirectory()
+        self.showdir()
 
     def tree(self):
         self.arbor = Frame(self.paned, bg="white", borderwidth=2, relief=GROOVE)
         self.arbor.pack(side=LEFT, padx=5, pady=5)
 
-        label = Label(self.arbor, text="Explorer", bg="yellow")
-        label.pack()
-
+        Button(self.arbor, text="Selectionner un dossier", command=partial(self.sel_dossier)).pack()
+#
+#        label = Label(self.arbor, text="Explorer", bg="yellow")
+#        label.pack()
+#
         self.paned.add(self.arbor, width=fenetre.winfo_screenwidth()*0.2)
-
+#
         self.frame_liste_fichier = LabelFrame(self.arbor, text="Listes des fichiers", relief=RIDGE)
-        dirlist=tix.DirList(self.arbor, command=self.showdir)
-        dirlist.pack(fill="x")
+#        dirlist=tix.DirList(self.arbor, command=self.showdir)
+#        dirlist.pack(fill="x")
 
         for x in os.listdir("./"):
             if x.endswith(".html") or x.endswith(".txt"):
                 but = Button(self.frame_liste_fichier, text=x, bg="yellow")
                 but.configure(command=partial(self.sel_fich, "./"+x))
-                
+
                 x = self.html.ret_html()
                 but.pack()
 
         self.ajout = Button(self.arbor, text="Créer une nouvelle page", command=partial(self.nom_fichier)).pack(side=BOTTOM)
-        
+
         self.frame_liste_fichier.pack()
 
     #permet de savoir sur quel element on est
@@ -113,18 +121,18 @@ class Main(object):
 
     #permet de savoit les clicks
     def mouseDown(self, event):
-       
-       
+
+
         #try sur clic dans fenetre pour savoir si clic sur un div par exemple
         #try:
         afficher(self.prop_pan, self.draw, fenetre, self.draw, self.html, self.html_menu)
         #except:
         #    print("error")
-        
+
         self.lastx = event.x
         self.lasty = event.y
 
-    #permet de capturer les mouvement de la souris 
+    #permet de capturer les mouvement de la souris
     def mouseMove(self, event):
         #permet d'obtenir les coordonnées du draw
         coor = self.draw.coords(CURRENT)
@@ -134,9 +142,9 @@ class Main(object):
 
     def principale(self):
         #self.paned.add(Label(self.paned, text='Main', background='red', anchor=CENTER), width=fenetre.winfo_screenwidth()*0.6)
-        
+
         self.paned.add(self.prin_pan, width=fenetre.winfo_screenwidth()*0.6)
-    
+
 
         self.draw.scrollY = Scrollbar(self.prin_pan, orient=VERTICAL)
 
@@ -155,17 +163,15 @@ class Main(object):
     def propriete(self):
         self.prop_pan = Frame(self.paned, bg="red")
 
-    def showdir(self, directory):
+    def showdir(self):
 
         for widget in self.frame_liste_fichier.winfo_children():
             widget.destroy()
 
-        self.cd=directory
-        
-        for x in os.listdir(directory):
+        for x in os.listdir(self.directory):
             if x.endswith(".html") or x.endswith(".txt"):
                 but = Button(self.frame_liste_fichier, text=x, bg="yellow")
-                but.configure(command=partial(self.sel_fich, directory+"/"+x))
+                but.configure(command=partial(self.sel_fich, self.directory+"/"+x))
                 but.pack()
         self.frame_liste_fichier.pack()
 
@@ -212,7 +218,7 @@ class Main(object):
             self.showdir((self.cd))
         else:
             messagebox.showwarning("Error", "You need to insert an name")
-        
-fenetre = tix.Tk()
+
+fenetre = Tk()
 app= Main(fenetre)
 fenetre.mainloop()
