@@ -24,6 +24,7 @@ class Main(object):
         self.fichier_ouvert=""
         self.html = fichier()
         self.html_menu = menu()
+        pre_parse_menu(self.html_menu)
         self.cd = "./"
 
         self.paned = PanedWindow(fenetre, orient=HORIZONTAL)
@@ -53,11 +54,13 @@ class Main(object):
         self.filemenu.add_command(label="Sauvegarder", command=self.sauvegarder)
         self.menu.add_cascade(label="Fichier", menu=self.filemenu)
 
-        self.menu.add_command(label="Menu", command=partial(self.sel_menu))
-        self.menu.add_command(label="aff menu", command=partial(self.html_menu.ret_menu))
+        self.menumenu = Menu(self.menu, tearoff=0)
+        self.menumenu.add_command(label="Editer le menu", command=partial(self.sel_menu))
+        self.menumenu.add_command(label="Ajouter le menu à la page", command=partial(ajout_menu_page, (self.fichier_ouvert), (self.html_menu), (self.draw), fenetre, self.html))
+        self.menu.add_cascade(label="Menu", menu=self.menumenu)
 
         self.addmenu = Menu(self.menu, tearoff=0)
-        self.addmenu.add_command(label="Ajouter un conteneur", command=partial(ajout_div, fenetre, (self.draw), (self.fichier_ouvert), (self.html)))
+        self.addmenu.add_command(label="Ajouter un conteneur", command=partial(ajout_div, fenetre, (self.draw), (self.fichier_ouvert), (self.html), (self.html_menu)))
         self.menu.add_cascade(label="Ajouter", menu=self.addmenu)
         fenetre.config(menu=self.menu)
 
@@ -68,17 +71,24 @@ class Main(object):
             codehtml.write(nouveau_code)
             codehtml.close()
         codemenu = open("menu.ew", "w")
+        print(self.html_menu.ret_menu())
         codemenu.write(self.html_menu.ret_menu())
         codemenu.close()
 
     def sel_fich(self, fichier):
         self.fichier_ouvert=fichier
         parse(fichier, (self.draw), fenetre, self.html)
-        self.addmenu.entryconfigure(1, command=partial(ajout_div, fenetre, (self.draw), (self.fichier_ouvert), (self.html)))
+        self.addmenu.entryconfigure(1, command=partial(ajout_div, fenetre, (self.draw), (self.fichier_ouvert), (self.html), (self.html_menu)))
+        self.menumenu.entryconfigure(1, command=partial(ajout_menu_page, self.fichier_ouvert, self.html_menu))
+        self.menumenu.entryconfigure(1, command=partial(ajout_menu_page, (self.fichier_ouvert), (self.html_menu), (self.draw), fenetre, self.html))
 
     def sel_menu(self):
         parse_menu(self.html_menu, (self.draw), fenetre)
         self.fichier_ouvert = "menu.ew"
+        self.menumenu.entryconfigure(1, command=partial(ajout_menu_page, self.fichier_ouvert, self.html_menu))
+        self.addmenu.entryconfigure(1, command=partial(ajout_div, fenetre, (self.draw), (self.fichier_ouvert), (self.html), (self.html_menu)))
+        self.menumenu.entryconfigure(1, command=partial(ajout_menu_page, (self.fichier_ouvert), (self.html_menu), (self.draw), fenetre, self.html))
+
 
     def sel_dossier(self):
         self.directory = filedialog.askdirectory()
@@ -161,7 +171,7 @@ class Main(object):
         self.draw.pack(side=LEFT)
 
     def propriete(self):
-        self.prop_pan = Frame(self.paned, bg="red")
+        self.prop_pan = Frame(self.paned)
 
     def showdir(self):
 

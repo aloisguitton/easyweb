@@ -5,11 +5,13 @@ from edition import *
 def afficher(prop_frame, obj, fenetre, draw, html, menu):
     for all in prop_frame.winfo_children():
             all.destroy()
+
     tag = obj.gettags(CURRENT)[0]
+
     Label(prop_frame, text=tag).pack()
 
     coor = obj.coords(CURRENT)
-    
+
     framemt = Frame(prop_frame)
     framemt.pack()
     t = StringVar()
