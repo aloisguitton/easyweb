@@ -20,12 +20,11 @@ class Main(object):
 
         fenetre.geometry("{0}x{1}+0+0".format(fenetre.winfo_screenwidth(), fenetre.winfo_screenheight()))
 
-        self.directory=""
+        self.directory="./"
         self.fichier_ouvert=""
         self.html = fichier()
         self.html_menu = menu()
         pre_parse_menu(self.html_menu)
-        self.cd = "./"
 
         self.paned = PanedWindow(fenetre, orient=HORIZONTAL)
 
@@ -61,34 +60,41 @@ class Main(object):
 
         self.addmenu = Menu(self.menu, tearoff=0)
         self.addmenu.add_command(label="Ajouter un conteneur", command=partial(ajout_div, fenetre, (self.draw), (self.fichier_ouvert), (self.html), (self.html_menu)))
+        self.addmenu.add_command(label="Ajouter un bouton", command=partial(ajout_bouton, fichier, fenetre, self.draw))
+        self.addmenu.add_command(label="test", command=partial(ajout_bout_div, self.draw))
         self.menu.add_cascade(label="Ajouter", menu=self.addmenu)
+
         fenetre.config(menu=self.menu)
 
     def sauvegarder(self):
         if self.fichier_ouvert != "":
-            nouveau_code = self.html.ret_html() + "</body>\n</html>"
+            nouveau_code = ""
+            nouveau_code_retour_vide = self.html.ret_html() + "</body>\n</html>"
+            nouveau_code_retour_vide_tab = nouveau_code_retour_vide.split("\n")
+            for line in nouveau_code_retour_vide_tab:
+                if line != "":
+                    nouveau_code = nouveau_code + line + "\n"
             codehtml = open(self.fichier_ouvert, "w")
             codehtml.write(nouveau_code)
             codehtml.close()
         codemenu = open("menu.ew", "w")
-        print(self.html_menu.ret_menu())
         codemenu.write(self.html_menu.ret_menu())
         codemenu.close()
 
     def sel_fich(self, fichier):
         self.fichier_ouvert=fichier
+        print(self.fichier_ouvert)
         parse(fichier, (self.draw), fenetre, self.html)
-        self.addmenu.entryconfigure(1, command=partial(ajout_div, fenetre, (self.draw), (self.fichier_ouvert), (self.html), (self.html_menu)))
-        self.menumenu.entryconfigure(1, command=partial(ajout_menu_page, self.fichier_ouvert, self.html_menu))
+        self.addmenu.entryconfigure(0, command=partial(ajout_div, fenetre, (self.draw), (self.fichier_ouvert), (self.html), (self.html_menu)))
+        self.addmenu.entryconfigure(1, command=partial(ajout_bouton, fichier, fenetre, self.draw))
         self.menumenu.entryconfigure(1, command=partial(ajout_menu_page, (self.fichier_ouvert), (self.html_menu), (self.draw), fenetre, self.html))
 
     def sel_menu(self):
         parse_menu(self.html_menu, (self.draw), fenetre)
         self.fichier_ouvert = "menu.ew"
-        self.menumenu.entryconfigure(1, command=partial(ajout_menu_page, self.fichier_ouvert, self.html_menu))
-        self.addmenu.entryconfigure(1, command=partial(ajout_div, fenetre, (self.draw), (self.fichier_ouvert), (self.html), (self.html_menu)))
+        self.addmenu.entryconfigure(0, command=partial(ajout_div, fenetre, (self.draw), (self.fichier_ouvert), (self.html), (self.html_menu)))
+        self.addmenu.entryconfigure(1, command=partial(ajout_bouton, fichier, fenetre, self.draw))
         self.menumenu.entryconfigure(1, command=partial(ajout_menu_page, (self.fichier_ouvert), (self.html_menu), (self.draw), fenetre, self.html))
-
 
     def sel_dossier(self):
         self.directory = filedialog.askdirectory()
@@ -178,6 +184,8 @@ class Main(object):
         for widget in self.frame_liste_fichier.winfo_children():
             widget.destroy()
 
+        print(self.directory)
+
         for x in os.listdir(self.directory):
             if x.endswith(".html") or x.endswith(".txt"):
                 but = Button(self.frame_liste_fichier, text=x, bg="yellow")
@@ -209,23 +217,23 @@ class Main(object):
         nom = nom.get()
         if nom != "":
             nom_page = nom
-            nom = self.cd + "/" + nom + ".html"
+            nom = self.directory + nom + ".html"
             html = """<!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="utf-8" />
-            <title>{0}</title>
-        </head>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>{0}</title>
+</head>
 
-        <body>
-        </body>
-        </html>
+<body>
+</body>
+</html>
                 """.format(nom_page)
             codehtml = open(nom, "w")
             codehtml.write(html)
             codehtml.close()
             div.destroy()
-            self.showdir((self.cd))
+            self.showdir()
         else:
             messagebox.showwarning("Error", "You need to insert an name")
 
