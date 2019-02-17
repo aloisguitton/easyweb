@@ -1,6 +1,7 @@
 from tkinter import *
 from functools import partial
 from edition import *
+from menu import *
 
 def afficher(prop_frame, obj, fenetre, draw, html, menu):
 
@@ -50,6 +51,10 @@ def afficher(prop_frame, obj, fenetre, draw, html, menu):
         Label(framehei, text="%").pack(side=LEFT)
 
         color = selcolor()
-        Button(prop_frame, text='Select Color', command=partial(color.getColor)).pack()
+        Button(prop_frame, text='Selectionner une couleur', command=partial(color.getColor)).pack()
 
-        Button(prop_frame, text="valider", command=partial(edit, w, h, t, l, tag, draw, color, fenetre, html, menu)).pack()
+        Button(prop_frame, text="Valider", command=partial(edit, w, h, t, l, tag, draw, color, fenetre, html, menu)).pack()
+
+    else:
+        coor = obj.coords(CURRENT)
+        print(coor)

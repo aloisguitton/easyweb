@@ -191,6 +191,30 @@ def ajout_menu_page(fichier, menu, draw, fenetre, html):
     else:
         messagebox.showwarning("Error", "Vous devez selectionner un fichier")
 
+def ajout_lien(texte, lien, div, menu_html, chemin):
+
+    fichier = chemin + "/menu.ew"
+    with open(fichier, 'r') as mon_fichier:
+                fichier_menu = mon_fichier.read()
+
+    avant=re.findall('<ul(.*)</ul>', fichier_menu, re.MULTILINE | re.DOTALL)[0]
+
+    if avant == " id=\"navigation\">\n":
+        apres=""" id=\"navigation\">
+<li><a href="{0}">{1}</a></li>
+""".format(lien.get(), texte.get())
+    else:
+        avant=re.findall('</l(.*)ul>', fichier_menu, re.MULTILINE | re.DOTALL)[0]
+        apres="""i>
+<li><a href="{0}">{1}</a></li>
+</""".format(lien.get(), texte.get())
+
+    html_val = fichier_menu.replace(avant, apres)
+    menu_html.remplacer(html_val)
+
+    div.destroy()
+
+#pas utilisé pour le moment
 def ajout_bouton(fichier, fenetre, draw):
     print("bouton")
     if fichier != "":
@@ -244,15 +268,14 @@ def ajout_bouton(fichier, fenetre, draw):
         combo.insert(1, "coucou")
         combo.pack()
 
-        Button(div, text="Ajouter", command=partial(ajout_bout_div, draw, widthlab, heightlab, toplab, leftlab, (taglab.get()), textelab, color, combo, div)).pack()
+        Button(div, text="Ajouter", command=partial(ajout_bout_div, draw, widthlab, heightlab, toplab, leftlab, taglab, textelab, color, combo, div, fenetre)).pack()
         div.mainloop()
     else:
         messagebox.showwarning("Error", "Vous devez selectionner un fichier")
 
-def ajout_bout_div(draw, w, h, top, left, tag, text, color, link, div):
+#pas utilisé pour le moment
+def ajout_bout_div(draw, w, h, top, left, tag, text, color, link, div, fenetre):
     color_value = color.ret_color()
-
-    print("tag", tag)
 
     if top.get() == "":
         top = 0
@@ -267,9 +290,12 @@ def ajout_bout_div(draw, w, h, top, left, tag, text, color, link, div):
     if tag != "":
         if w.get().isdigit():
             if float(w.get()) != 0:
+                w = w.get()
                 if h.get().isdigit():
                     if float(h.get()) != 0:
+                        h = h.get()
                         div.destroy()
+                        draw.create_rectangle(fenetre.winfo_screenwidth()*0.6*(float(left)/100), fenetre.winfo_screenheight()*(float(top)/100), fenetre.winfo_screenwidth()*0.6*(float(left)/100) + fenetre.winfo_screenwidth()*0.6*(float(w)/100), fenetre.winfo_screenheight()*(float(top)/100)+fenetre.winfo_screenheight()*(float(h)/100), fill=color_value, tags=tag)
                         draw.create_text(0, 10, text="bouton", activefill="#2EFEF7")
                     else:
                         messagebox.showwarning("Error","Height can't be egal to 0")

@@ -23,7 +23,8 @@ class Main(object):
         self.directory="./"
         self.fichier_ouvert=""
         self.html = fichier()
-        self.html_menu = menu()
+        self.html_menu = menu(self.directory)
+
         pre_parse_menu(self.html_menu)
 
         self.paned = PanedWindow(fenetre, orient=HORIZONTAL)
@@ -55,6 +56,7 @@ class Main(object):
 
         self.menumenu = Menu(self.menu, tearoff=0)
         self.menumenu.add_command(label="Editer le menu", command=partial(self.sel_menu))
+        self.menumenu.add_command(label="Ajouter un lien", command=partial(ajouter_lien_menu, fenetre, (self.fichier_ouvert), self.directory, self.html_menu))
         self.menumenu.add_command(label="Ajouter le menu à la page", command=partial(ajout_menu_page, (self.fichier_ouvert), (self.html_menu), (self.draw), fenetre, self.html))
         self.menu.add_cascade(label="Menu", menu=self.menumenu)
 
@@ -87,36 +89,35 @@ class Main(object):
         parse(fichier, (self.draw), fenetre, self.html)
         self.addmenu.entryconfigure(0, command=partial(ajout_div, fenetre, (self.draw), (self.fichier_ouvert), (self.html), (self.html_menu)))
         self.addmenu.entryconfigure(1, command=partial(ajout_bouton, fichier, fenetre, self.draw))
-        self.menumenu.entryconfigure(1, command=partial(ajout_menu_page, (self.fichier_ouvert), (self.html_menu), (self.draw), fenetre, self.html))
+        self.menumenu.entryconfigure(1, command=partial(ajouter_lien_menu, fenetre, (self.fichier_ouvert), self.directory, self.html_menu))
+        self.menumenu.entryconfigure(2, command=partial(ajout_menu_page, (self.fichier_ouvert), (self.html_menu), (self.draw), fenetre, self.html))
 
     def sel_menu(self):
         parse_menu(self.html_menu, (self.draw), fenetre)
         self.fichier_ouvert = "menu.ew"
         self.addmenu.entryconfigure(0, command=partial(ajout_div, fenetre, (self.draw), (self.fichier_ouvert), (self.html), (self.html_menu)))
         self.addmenu.entryconfigure(1, command=partial(ajout_bouton, fichier, fenetre, self.draw))
-        self.menumenu.entryconfigure(1, command=partial(ajout_menu_page, (self.fichier_ouvert), (self.html_menu), (self.draw), fenetre, self.html))
+        self.menumenu.entryconfigure(1, command=partial(ajouter_lien_menu, fenetre, (self.fichier_ouvert), self.directory, self.html_menu))
+        self.menumenu.entryconfigure(2, command=partial(ajout_menu_page, (self.fichier_ouvert), (self.html_menu), (self.draw), fenetre, self.html))
+        print(self.fichier_ouvert)
 
     def sel_dossier(self):
         self.directory = filedialog.askdirectory()
         self.showdir()
+        self.html_menu = menu(self.directory)
 
     def tree(self):
         self.arbor = Frame(self.paned, bg="white", borderwidth=2, relief=GROOVE)
         self.arbor.pack(side=LEFT, padx=5, pady=5)
 
         Button(self.arbor, text="Selectionner un dossier", command=partial(self.sel_dossier)).pack()
-#
-#        label = Label(self.arbor, text="Explorer", bg="yellow")
-#        label.pack()
-#
+
         self.paned.add(self.arbor, width=fenetre.winfo_screenwidth()*0.2)
-#
+
         self.frame_liste_fichier = LabelFrame(self.arbor, text="Listes des fichiers", relief=RIDGE)
-#        dirlist=tix.DirList(self.arbor, command=self.showdir)
-#        dirlist.pack(fill="x")
 
         for x in os.listdir("./"):
-            if x.endswith(".html") or x.endswith(".txt"):
+            if x.endswith(".html"):
                 but = Button(self.frame_liste_fichier, text=x, bg="yellow")
                 but.configure(command=partial(self.sel_fich, "./"+x))
 
@@ -187,7 +188,7 @@ class Main(object):
         print(self.directory)
 
         for x in os.listdir(self.directory):
-            if x.endswith(".html") or x.endswith(".txt"):
+            if x.endswith(".html"):
                 but = Button(self.frame_liste_fichier, text=x, bg="yellow")
                 but.configure(command=partial(self.sel_fich, self.directory+"/"+x))
                 but.pack()
@@ -217,7 +218,8 @@ class Main(object):
         nom = nom.get()
         if nom != "":
             nom_page = nom
-            nom = self.directory + nom + ".html"
+            nom = self.directory + "/" + nom + ".html"
+            print(nom)
             html = """<!DOCTYPE html>
 <html>
 <head>
