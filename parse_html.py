@@ -1,9 +1,14 @@
 import re
+from edition import *
 
 def parse(fichier, draw, fenetre, html):
     with open(fichier, 'r') as mon_fichier:
                 txt = mon_fichier.read()
     body = re.findall(r"<body>(.*)</body>", txt, re.MULTILINE | re.DOTALL)[0]
+    try:
+        menu = re.findall(r"<ul(.*)</ul>", txt, re.MULTILINE | re.DOTALL)[0]
+    except:
+        menu = ""
     debut = re.findall(r"(.*)<body>", txt, re.MULTILINE | re.DOTALL)[0]
     div_liste = re.findall('<div(.*)>', body)
     html.reset()
@@ -19,6 +24,8 @@ def parse(fichier, draw, fenetre, html):
             top = re.findall('top:(.*)%;l', div)[0]
             tag = re.findall('id="(.*)" st', div)[0]
             draw.create_rectangle(fenetre.winfo_screenwidth()*0.6*(float(l)/100), fenetre.winfo_screenheight()*(float(top)/100), fenetre.winfo_screenwidth()*0.6*(float(l)/100) + fenetre.winfo_screenwidth()*0.6*(float(w)/100), fenetre.winfo_screenheight()*(float(top)/100)+fenetre.winfo_screenheight()*(float(h)/100), fill=color, tags=tag)
+        if menu != "":
+            ajout_lien_menu_div(draw, txt, fenetre)
     except:
         pass
 
@@ -36,6 +43,7 @@ def parse_menu(menu, draw, fenetre):
                 txt = mon_fichier.read()
 
     div_liste = re.findall('<div(.*)">', txt)
+
     menu.reset()
     menu.ecrire(txt)
 
@@ -50,3 +58,5 @@ def parse_menu(menu, draw, fenetre):
         top = re.findall('top:(.*)%;l', div)[0]
         tag = re.findall('id="(.*)" st', div)[0]
         draw.create_rectangle(fenetre.winfo_screenwidth()*0.6*(float(l)/100), fenetre.winfo_screenheight()*(float(top)/100), fenetre.winfo_screenwidth()*0.6*(float(l)/100) + fenetre.winfo_screenwidth()*0.6*(float(w)/100), fenetre.winfo_screenheight()*(float(top)/100)+fenetre.winfo_screenheight()*(float(h)/100), fill=color, tags=tag)
+
+    ajout_lien_menu_div(draw, txt, fenetre)

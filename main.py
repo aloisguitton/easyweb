@@ -56,8 +56,8 @@ class Main(object):
 
         self.menumenu = Menu(self.menu, tearoff=0)
         self.menumenu.add_command(label="Editer le menu", command=partial(self.sel_menu))
-        self.menumenu.add_command(label="Ajouter un lien", command=partial(ajouter_lien_menu, fenetre, (self.fichier_ouvert), self.directory, self.html_menu))
-        self.menumenu.add_command(label="Ajouter le menu à la page", command=partial(ajout_menu_page, (self.fichier_ouvert), (self.html_menu), (self.draw), fenetre, self.html))
+        self.menumenu.add_command(label="Ajouter un lien", command=partial(ajouter_lien_menu, fenetre, (self.fichier_ouvert), self.directory, self.html_menu, self.draw))
+        self.menumenu.add_command(label="Ajouter/mettre à jour le menu à la page", command=partial(ajout_menu_page, (self.fichier_ouvert), (self.html_menu), (self.draw), fenetre, self.html))
         self.menu.add_cascade(label="Menu", menu=self.menumenu)
 
         self.addmenu = Menu(self.menu, tearoff=0)
@@ -85,11 +85,10 @@ class Main(object):
 
     def sel_fich(self, fichier):
         self.fichier_ouvert=fichier
-        print(self.fichier_ouvert)
         parse(fichier, (self.draw), fenetre, self.html)
         self.addmenu.entryconfigure(0, command=partial(ajout_div, fenetre, (self.draw), (self.fichier_ouvert), (self.html), (self.html_menu)))
         self.addmenu.entryconfigure(1, command=partial(ajout_bouton, fichier, fenetre, self.draw))
-        self.menumenu.entryconfigure(1, command=partial(ajouter_lien_menu, fenetre, (self.fichier_ouvert), self.directory, self.html_menu))
+        self.menumenu.entryconfigure(1, command=partial(ajouter_lien_menu, fenetre, (self.fichier_ouvert), self.directory, self.html_menu, self.draw))
         self.menumenu.entryconfigure(2, command=partial(ajout_menu_page, (self.fichier_ouvert), (self.html_menu), (self.draw), fenetre, self.html))
 
     def sel_menu(self):
@@ -97,9 +96,8 @@ class Main(object):
         self.fichier_ouvert = "menu.ew"
         self.addmenu.entryconfigure(0, command=partial(ajout_div, fenetre, (self.draw), (self.fichier_ouvert), (self.html), (self.html_menu)))
         self.addmenu.entryconfigure(1, command=partial(ajout_bouton, fichier, fenetre, self.draw))
-        self.menumenu.entryconfigure(1, command=partial(ajouter_lien_menu, fenetre, (self.fichier_ouvert), self.directory, self.html_menu))
+        self.menumenu.entryconfigure(1, command=partial(ajouter_lien_menu, fenetre, (self.fichier_ouvert), self.directory, self.html_menu, self.draw))
         self.menumenu.entryconfigure(2, command=partial(ajout_menu_page, (self.fichier_ouvert), (self.html_menu), (self.draw), fenetre, self.html))
-        print(self.fichier_ouvert)
 
     def sel_dossier(self):
         self.directory = filedialog.askdirectory()
@@ -185,8 +183,6 @@ class Main(object):
         for widget in self.frame_liste_fichier.winfo_children():
             widget.destroy()
 
-        print(self.directory)
-
         for x in os.listdir(self.directory):
             if x.endswith(".html"):
                 but = Button(self.frame_liste_fichier, text=x, bg="yellow")
@@ -219,17 +215,16 @@ class Main(object):
         if nom != "":
             nom_page = nom
             nom = self.directory + "/" + nom + ".html"
-            print(nom)
             html = """<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8" />
-    <title>{0}</title>
-</head>
+                    <html>
+                    <head>
+                        <meta charset="utf-8" />
+                        <title>{0}</title>
+                    </head>
 
-<body>
-</body>
-</html>
+                    <body>
+                    </body>
+                    </html>
                 """.format(nom_page)
             codehtml = open(nom, "w")
             codehtml.write(html)

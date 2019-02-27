@@ -1,8 +1,8 @@
 from tkinter import *
 from fichier import *
+from selcolor import *
 from tkinter.filedialog import *
 from tkinter import ttk
-from selcolor import *
 from functools import partial
 from tkinter import messagebox
 import re
@@ -138,7 +138,8 @@ def edit_ajout_div_princ(draw, html, w, h, color, fenetre, top, tag, left):
     html.remplacer(html_val)
 
 def ajout_div_princ(div, draw, html, w, h, color, fenetre, top, tag, left, fichier):
-    tag += "_menu_bar_ew"
+    if fichier == "_menu_bar_ew":
+        tag += "_menu_bar_ew"
     div.destroy()
     draw.create_rectangle(fenetre.winfo_screenwidth()*0.6*(float(left)/100), fenetre.winfo_screenheight()*(float(top)/100), fenetre.winfo_screenwidth()*0.6*(float(left)/100) + fenetre.winfo_screenwidth()*0.6*(float(w)/100), fenetre.winfo_screenheight()*(float(top)/100)+fenetre.winfo_screenheight()*(float(h)/100), fill=color, tags=tag)
     if fichier == "menu.ew":
@@ -165,14 +166,28 @@ def ajout_menu_page(fichier, menu, draw, fenetre, html):
 
             for line in body_split:
                 res = re.search("menu_bar_ew", line)
-                if res:
+                li = re.search("li", line)
+                ul = re.search("ul", line)
+                if res or li or ul:
+                    res2 = re.search("</a>", line)
+                    if res2:
+                        texte = re.findall('\">(.*)</a>', line)[0]
+                        tag = "menu_lien_" + texte
+                        draw.delete(tag)
                     menu_nb += 1
+                    item = re.findall('id=\"(.*)\" style', line)
+                    draw.delete(item)
                 else:
                     nouv_html = nouv_html + line + "\n"
 
             menu_html = menu.ret_menu()
             nouv_html += menu_html
+
+            print(nouv_html)
+
             div_liste = re.findall('<div(.*)">', menu_html)
+            a_liste = re.findall('<a(.*)</a>', menu_html)
+            a_liste.reverse()
 
             html_val = html_html.replace(body, nouv_html)
 
@@ -186,37 +201,68 @@ def ajout_menu_page(fichier, menu, draw, fenetre, html):
                 top = re.findall('top:(.*)%;l', div)[0]
                 tag = re.findall('id="(.*)" st', div)[0]
                 draw.create_rectangle(fenetre.winfo_screenwidth()*0.6*(float(l)/100), fenetre.winfo_screenheight()*(float(top)/100), fenetre.winfo_screenwidth()*0.6*(float(l)/100) + fenetre.winfo_screenwidth()*0.6*(float(w)/100), fenetre.winfo_screenheight()*(float(top)/100)+fenetre.winfo_screenheight()*(float(h)/100), fill=color, tags=tag)
+
+            i=0
+
+            for a in a_liste:
+                i=i+1
+                print(a)
+                texte = re.findall('\">(.*)', a)[0]
+                tag = "menu_lien_" + texte
+                draw.create_text(fenetre.winfo_screenwidth()*0.6 - 75*i, fenetre.winfo_screenheight()*0.025, text=texte, tags=tag)
+
         else:
             messagebox.showwarning("Error", "Vous ne pouvez pas ajouter un menu à un menu")
     else:
         messagebox.showwarning("Error", "Vous devez selectionner un fichier")
 
-def ajout_lien(texte, lien, div, menu_html, chemin):
+def ajout_lien(texte, lien, div, menu_html, chemin, draw, fenetre):
 
-    fichier = chemin + "/menu.ew"
-    with open(fichier, 'r') as mon_fichier:
-                fichier_menu = mon_fichier.read()
+    # fichier = chemin + "/menu.ew"
+    # with open(fichier, 'r') as mon_fichier:
+                # fichier_menu = mon_fichier.read()
+    fichier_menu = menu_html.ret_menu()
 
     avant=re.findall('<ul(.*)</ul>', fichier_menu, re.MULTILINE | re.DOTALL)[0]
 
-    if avant == " id=\"navigation\">\n":
-        apres=""" id=\"navigation\">
-<li><a href="{0}">{1}</a></li>
-""".format(lien.get(), texte.get())
+    # couleur_var = couleur.ret_color()
+
+    if avant == " id=\"navigation_menu_bar_ew\" style=\"z-index: 3;height: 5%;position: absolute;margin-top: 0;margin-bottom: 0;right: 0;\">":
+        apres=""" id=\"navigation_menu_bar_ew\" style=\"z-index: 3;height: 5%;position: absolute;margin-top: 0;margin-bottom: 0;right: 0;\">
+        <li id=\"li_menu_bar_ew\" style=\"display: inline\">
+            <a href="{0}" id=\"li_menu_bar_ew\" style=\"text-decoration: none;margin-right: 10px;margin-left: 10px;\">{1}</a>
+        </li>""".format(lien.get(), texte.get())
     else:
-        avant=re.findall('</l(.*)ul>', fichier_menu, re.MULTILINE | re.DOTALL)[0]
+        avant=re.findall('</l(.*)ul>', fichier_menu)[0]
         apres="""i>
-<li><a href="{0}">{1}</a></li>
-</""".format(lien.get(), texte.get())
+        <li id=\"li_menu_bar_ew\" style=\"display: inline\">
+            <a href="{0}" id=\"li_menu_bar_ew\" style=\"text-decoration: none;margin-right: 10px;margin-left: 10px;\">{1}</a>
+        </li></""".format(lien.get(), texte.get())
 
     html_val = fichier_menu.replace(avant, apres)
+
+    ajout_lien_menu_div(draw, html_val, fenetre)
+
     menu_html.remplacer(html_val)
 
     div.destroy()
 
+def ajout_lien_menu_div(draw, html, fenetre):
+
+    texte_lien = re.findall('10px;">(.*)</a>', html)
+
+    texte_lien.reverse()
+    i=0
+
+    for texte in texte_lien:
+        i=i+1
+        tag = "menu_lien_" + texte
+        draw.delete(tag)
+        # draw.create_text(fenetre.winfo_screenwidth()*0.6 - 75*i, fenetre.winfo_screenheight()*0.025, text=texte, activefill=couleur, tags=tag)
+        draw.create_text(fenetre.winfo_screenwidth()*0.6 - 75*i, fenetre.winfo_screenheight()*0.025, text=texte, tags=tag)
+
 #pas utilisé pour le moment
 def ajout_bouton(fichier, fenetre, draw):
-    print("bouton")
     if fichier != "":
         color = selcolor()
         div = Toplevel(fenetre)
