@@ -1,9 +1,10 @@
 from tkinter import *
 from functools import partial
 from edition import *
+import tkinter.ttk as ttk
 from menu import *
 
-def afficher(prop_frame, obj, fenetre, draw, html, menu):
+def afficher(prop_frame, obj, fenetre, draw, html, menu, chemin, fichier):
 
     type = obj.type(CURRENT)
 
@@ -16,45 +17,83 @@ def afficher(prop_frame, obj, fenetre, draw, html, menu):
     Label(prop_frame, text=tag).pack()
 
     if type == "rectangle":
-        coor = obj.coords(CURRENT)
+        res = re.search("menu_bar_", tag)
+        res2 = re.search("menu.ew", fichier)
 
-        framemt = Frame(prop_frame)
-        framemt.pack()
-        t = StringVar()
-        Label(framemt, text="Margin top: ").pack(side=LEFT)
-        Entry(framemt, textvariable=t).pack(side=LEFT)
-        t.set(int(int(coor[1])/fenetre.winfo_screenheight()*100))
-        Label(framemt, text="%").pack(side=LEFT)
+        print(res2)
 
-        frameml = Frame(prop_frame)
-        frameml.pack()
-        l = StringVar()
-        Label(frameml, text="Margin left: ").pack(side=LEFT)
-        Entry(frameml, textvariable=l).pack(side=LEFT)
-        l.set(int(int(coor[0])/fenetre.winfo_screenwidth()*(100/60)*100))
-        Label(frameml, text="%").pack(side=LEFT)
+        if res and res2 == None:
+            Label(prop_frame, text="Vous devez editer ce conteneur \n dans l'onglet \"editer le menu\"").pack()
+        else:
+            coor = obj.coords(CURRENT)
 
-        framewid = Frame(prop_frame)
-        framewid.pack()
-        w = StringVar()
-        Label(framewid, text="Width: ").pack(side=LEFT)
-        Entry(framewid, textvariable=w).pack(side=LEFT)
-        w.set(int((int(coor[2])-int(coor[0]))/fenetre.winfo_screenwidth()*(100/60)*100))
-        Label(framewid, text="%").pack(side=LEFT)
+            framemt = Frame(prop_frame)
+            framemt.pack()
+            t = StringVar()
+            Label(framemt, text="Margin top: ").pack(side=LEFT)
+            Entry(framemt, textvariable=t).pack(side=LEFT)
+            t.set(int(int(coor[1])/fenetre.winfo_screenheight()*100))
+            Label(framemt, text="%").pack(side=LEFT)
 
-        framehei = Frame(prop_frame)
-        framehei.pack()
-        h = StringVar()
-        Label(framehei, text="Height: ").pack(side=LEFT)
-        Entry(framehei, textvariable=h).pack(side=LEFT)
-        h.set(int((int(coor[3])-int(coor[1]))/fenetre.winfo_screenheight()*100))
-        Label(framehei, text="%").pack(side=LEFT)
+            frameml = Frame(prop_frame)
+            frameml.pack()
+            l = StringVar()
+            Label(frameml, text="Margin left: ").pack(side=LEFT)
+            Entry(frameml, textvariable=l).pack(side=LEFT)
+            l.set(int(int(coor[0])/fenetre.winfo_screenwidth()*(100/60)*100))
+            Label(frameml, text="%").pack(side=LEFT)
 
-        color = selcolor()
-        Button(prop_frame, text='Selectionner une couleur', command=partial(color.getColor)).pack()
+            framewid = Frame(prop_frame)
+            framewid.pack()
+            w = StringVar()
+            Label(framewid, text="Width: ").pack(side=LEFT)
+            Entry(framewid, textvariable=w).pack(side=LEFT)
+            w.set(int((int(coor[2])-int(coor[0]))/fenetre.winfo_screenwidth()*(100/60)*100))
+            Label(framewid, text="%").pack(side=LEFT)
 
-        Button(prop_frame, text="Valider", command=partial(edit, w, h, t, l, tag, draw, color, fenetre, html, menu)).pack()
+            framehei = Frame(prop_frame)
+            framehei.pack()
+            h = StringVar()
+            Label(framehei, text="Height: ").pack(side=LEFT)
+            Entry(framehei, textvariable=h).pack(side=LEFT)
+            h.set(int((int(coor[3])-int(coor[1]))/fenetre.winfo_screenheight()*100))
+            Label(framehei, text="%").pack(side=LEFT)
+
+            color = selcolor()
+            Button(prop_frame, text='Selectionner une couleur', command=partial(color.getColor)).pack()
+
+            Button(prop_frame, text="Valider", command=partial(edit, w, h, t, l, tag, draw, color, fenetre, html, menu)).pack()
+            si_menu = re.search("menu.ew", fichier)
+            if si_menu:
+                Button(prop_frame, text="Supprimer", command=partial(supprimer_div, tag, draw, menu, 0)).pack()
+            else:
+                Button(prop_frame, text="Supprimer", command=partial(supprimer_div, tag, draw, html, 1)).pack()        
+    elif type == "text":
+        res = re.search("menu_lien_", tag)
+        res2 = re.search("menu.ew", fichier)
+        if res and res2 == None:
+            Label(prop_frame, text="Vous devez editer ce lien \n dans l'onglet \"editer le menu\"").pack()
+        elif res:
+            framenom = Frame(prop_frame)
+            framenom.pack()
+            nom = StringVar()
+            Label(framenom, text="Texte du lien").pack(side=LEFT)
+            Entry(framenom, textvariable=nom).pack(side=LEFT)
+            nom.set(tag[10:])
+            ancien_tag = tag[10:]
+
+            framelien = Frame(prop_frame)
+            framelien.pack()
+            Label(framelien, text="Lien").pack(side=LEFT)
+            liste = []
+            for x in os.listdir(chemin):
+                if x.endswith(".html"):
+                    liste.append(x)
+
+            combo = ttk.Combobox(framelien, value=liste)
+            combo.pack(side=LEFT)
+
+            Button(prop_frame, text="Mettre à jour le lien", command=partial(mise_jour_lien, nom, combo, menu, ancien_tag, draw, fenetre)).pack()
 
     else:
         coor = obj.coords(CURRENT)
-        print(coor)

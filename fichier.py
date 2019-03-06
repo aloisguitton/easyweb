@@ -8,6 +8,7 @@ class fichier(object):
 
     def remplacer(self, html):
         self.html = html
+        print(html)
 
     def reset(self):
         self.html=""

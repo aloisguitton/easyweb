@@ -229,13 +229,13 @@ def ajout_lien(texte, lien, div, menu_html, chemin, draw, fenetre):
 
     if avant == " id=\"navigation_menu_bar_ew\" style=\"z-index: 3;height: 5%;position: absolute;margin-top: 0;margin-bottom: 0;right: 0;\">":
         apres=""" id=\"navigation_menu_bar_ew\" style=\"z-index: 3;height: 5%;position: absolute;margin-top: 0;margin-bottom: 0;right: 0;\">
-        <li id=\"li_menu_bar_ew\" style=\"display: inline\">
+        <li id=\"li_menu_bar_ew\" style=\"display: inline-block;margin-top: 2%\">
             <a href="{0}" id=\"li_menu_bar_ew\" style=\"text-decoration: none;margin-right: 10px;margin-left: 10px;\">{1}</a>
         </li>""".format(lien.get(), texte.get())
     else:
         avant=re.findall('</l(.*)ul>', fichier_menu)[0]
         apres="""i>
-        <li id=\"li_menu_bar_ew\" style=\"display: inline\">
+        <li id=\"li_menu_bar_ew\" style=\"display: inline-block;margin-top: 2%\">
             <a href="{0}" id=\"li_menu_bar_ew\" style=\"text-decoration: none;margin-right: 10px;margin-left: 10px;\">{1}</a>
         </li></""".format(lien.get(), texte.get())
 
@@ -246,6 +246,17 @@ def ajout_lien(texte, lien, div, menu_html, chemin, draw, fenetre):
     menu_html.remplacer(html_val)
 
     div.destroy()
+
+def mise_jour_lien(nom, lien, menu, ancien_tag, draw, fenetre):
+    menu_txt = menu.ret_menu()
+    reg = "<a (.*)" + ancien_tag + "</a>"
+    avant = re.findall(reg, menu_txt)[0] + ancien_tag
+    apres = "href=\"{0}\" id=\"li_menu_bar_ew\" style=\"text-decoration: none;margin-right: 10px;margin-left: 10px;\">{1}".format(lien.get(), nom.get())
+    nouv_menu = menu_txt.replace(avant, apres)
+    ancien_tag = "menu_lien_" + ancien_tag
+    draw.delete(ancien_tag)
+    ajout_lien_menu_div(draw, nouv_menu, fenetre)
+    menu.remplacer(nouv_menu)
 
 def ajout_lien_menu_div(draw, html, fenetre):
 
@@ -261,6 +272,19 @@ def ajout_lien_menu_div(draw, html, fenetre):
         # draw.create_text(fenetre.winfo_screenwidth()*0.6 - 75*i, fenetre.winfo_screenheight()*0.025, text=texte, activefill=couleur, tags=tag)
         draw.create_text(fenetre.winfo_screenwidth()*0.6 - 75*i, fenetre.winfo_screenheight()*0.025, text=texte, tags=tag)
 
+#si id = 0 alors menu si id=1 alors pas menu
+def supprimer_div(tag, draw, html, id):
+    if id == 0:
+        html_val = html.ret_menu()
+    else:
+        html_val = html.ret_html()
+
+    reg = "<div id=\"{0}\" (.*)div>".format(tag)
+    avant = "<div id=\"{0}\" ".format(tag) + re.findall(reg, html_val)[0] + "div>"
+    # avant = """<div id="aze" style="width:20%;background:#df0f1d;height:3%;position:absolute;top:7%;left:39%"></div>"""
+    draw.delete(tag)
+    html_val = html_val.replace(avant, "")
+    html.remplacer(html_val)
 #pas utilisé pour le moment
 def ajout_bouton(fichier, fenetre, draw):
     if fichier != "":

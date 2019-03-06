@@ -1,8 +1,5 @@
-<div id="menu_bar_ew" style="width:100%;background:grey;height:5%;position:fixed;top:0%;left:0%"></div>
+<div id="menu_bar_ew" style="width:100%;background:#ec9dde;height:5%;position:absolute;top:0%;left:0%"></div>
             <ul id="navigation_menu_bar_ew" style="z-index: 3;height: 5%;position: absolute;margin-top: 0;margin-bottom: 0;right: 0;">
-        <li id="li_menu_bar_ew" style="display: inline">
-            <a href="dorian.html" id="li_menu_bar_ew" style="text-decoration: none;margin-right: 10px;margin-left: 10px;">az</a>
-        </li>
-        <li id="li_menu_bar_ew" style="display: inline">
-            <a href="index.html" id="li_menu_bar_ew" style="text-decoration: none;margin-right: 10px;margin-left: 10px;">aze</a>
+        <li id="li_menu_bar_ew" style="display: inline-block;margin-top: 2%">
+            <a href="index.html" id="li_menu_bar_ew" style="text-decoration: none;margin-right: 10px;margin-left: 10px;">Accueil</a>
         </li></ul>
