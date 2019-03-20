@@ -15,14 +15,19 @@ def afficher(prop_frame, obj, fenetre, draw, html, menu, chemin, fichier, gifsdi
 
     Label(prop_frame, text=tag).pack()
 
-    if type == "rectangle":
-        item = re.findall("<div id=\"{0}\"(.*)".format(tag), html.ret_html())[0]
-        couleur = re.findall("background:(.*);hei", item)[0]
+    print("fichier::::::::::::::" + fichier)
 
+    if type == "rectangle":
         res = re.search("menu_bar_", tag)
         res2 = re.search("menu.ew", fichier)
 
-        print(res2)
+        if res2:
+            item = re.findall("<div id=\"{0}\"(.*)".format(tag), menu.ret_menu())[0]
+        else:
+            item = re.findall("<div id=\"{0}\"(.*)".format(tag), html.ret_html())[0]
+        couleur = re.findall("background:(.*);hei", item)[0]
+
+
 
         if res and res2 == None:
             Label(prop_frame, text="Vous devez editer ce conteneur \n dans l'onglet \"editer le menu\"").pack()
