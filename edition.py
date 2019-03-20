@@ -1,6 +1,13 @@
 from tkinter import *
 from fichier import *
+from image import *
+from random import *
 from selcolor import *
+import PIL.Image
+import PIL.ImageTk
+from resizeimage import resizeimage
+from os.path import basename
+from shutil import copyfile
 from tkinter.filedialog import *
 from tkinter import ttk
 from functools import partial
@@ -39,7 +46,7 @@ def ajout_div_fun(w, h, color, div, draw, html, fenetre, top, tag, left, fichier
     else:
         messagebox.showwarning("Error", "You need to insert an id")
 
-def edit(w, h, top, left, tag, draw, color, fenetre, html, menu):
+def edit(w, h, top, left, tag, draw, color, fenetre, html, menu, couleur):
     color_value = color.ret_color()
     if top.get() == "":
         top = 0
@@ -50,7 +57,7 @@ def edit(w, h, top, left, tag, draw, color, fenetre, html, menu):
     else:
         left = left.get()
     if color_value == None:
-        color_value = "#FFFFFF"
+        color_value = couleur
     if tag != "":
         if w.get().isdigit():
             if float(w.get()) != 0:
@@ -72,52 +79,81 @@ def edit(w, h, top, left, tag, draw, color, fenetre, html, menu):
     else:
         messagebox.showwarning("Error", "You need to insert an id")
 
+def edit_image(w, h, top, left, tag, draw, fenetre, html, menu, img, gifsdict):
+    if top.get() == "":
+        top = 0
+    else:
+        top = top.get()
+    if left.get() == "":
+        left = 0
+    else:
+        left = left.get()
+    if tag != "":
+        if w.get().isdigit():
+            if float(w.get()) != 0:
+                if h.get().isdigit():
+                    if float(h.get()) != 0:
+                        draw.delete(tag)
+                        edit_ajout_image_princ(draw, html, w.get(), h.get(), fenetre, top, tag, left, img, gifsdict)
+                        print("edition")
+                    else:
+                        messagebox.showwarning("Error","Height can't be egal to 0")
+                else:
+                    messagebox.showwarning("Error", "You need to insert a integer")
+            else:
+                messagebox.showwarning("Error","Weight can't be egal to 0")
+        else:
+            messagebox.showwarning("Error", "You need to insert a integer")
+    else:
+        messagebox.showwarning("Error", "You need to insert an id")
+
 def ajout_div(fenetre, draw, fichier, html, menu):
     color = selcolor()
     if fichier != "":
-        div = Toplevel(fenetre)
-        framewid = Frame(div)
-        framewid.pack()
-        L1 = Label(framewid, text="Largeur(%)")
-        L1.pack( side = LEFT)
-        widthlab = Entry(framewid, bd =5)
-        widthlab.pack(side = RIGHT)
-
-        framemt = Frame(div)
-        framemt.pack()
-        L1 = Label(framemt, text="Hauteur(%)  ")
-        L1.pack( side = LEFT)
-        heightlab = Entry(framemt, bd =5)
-        heightlab.pack(side = RIGHT)
-
-        frametop = Frame(div)
-        frametop.pack()
-        L1 = Label(frametop, text="Marge Top(%)  ")
-        L1.pack( side = LEFT)
-        toplab = Entry(frametop, bd =5)
-        toplab.pack(side = RIGHT)
-
-        frameleft = Frame(div)
-        frameleft.pack()
-        L1 = Label(frameleft, text="Marge Gauche(%)  ")
-        L1.pack( side = LEFT)
-        leftlab = Entry(frameleft, bd =5)
-        leftlab.pack(side = RIGHT)
-
-        frametag = Frame(div)
-        frametag.pack()
-        L1 = Label(frametag, text="ID (Doit être unique)")
-        L1.pack( side = LEFT)
-        taglab = Entry(frametag, bd =5)
-        taglab.pack(side = RIGHT)
-
-        Button(div, text='Couleur du conteneur', command=partial(color.getColor)).pack()
-
         if fichier == "menu.ew":
-            Button(div, text="Valider", bg="Green", command=partial(ajout_div_fun, widthlab, heightlab, color, div, draw, menu, fenetre, toplab, taglab, leftlab, fichier)).pack(side=BOTTOM)
+            messagebox.showwarning("Error", "Vous ne pouvez pas ajouter un conteneur au menu")
         else:
+            div = Toplevel(fenetre)
+            framewid = Frame(div)
+            framewid.pack()
+            L1 = Label(framewid, text="Largeur(%)")
+            L1.pack( side = LEFT)
+            widthlab = Entry(framewid, bd =5)
+            widthlab.pack(side = RIGHT)
+
+            framemt = Frame(div)
+            framemt.pack()
+            L1 = Label(framemt, text="Hauteur(%)  ")
+            L1.pack( side = LEFT)
+            heightlab = Entry(framemt, bd =5)
+            heightlab.pack(side = RIGHT)
+
+            frametop = Frame(div)
+            frametop.pack()
+            L1 = Label(frametop, text="Marge Top(%)  ")
+            L1.pack( side = LEFT)
+            toplab = Entry(frametop, bd =5)
+            toplab.pack(side = RIGHT)
+
+            frameleft = Frame(div)
+            frameleft.pack()
+            L1 = Label(frameleft, text="Marge Gauche(%)  ")
+            L1.pack( side = LEFT)
+            leftlab = Entry(frameleft, bd =5)
+            leftlab.pack(side = RIGHT)
+
+            frametag = Frame(div)
+            frametag.pack()
+            L1 = Label(frametag, text="ID (Doit être unique)")
+            L1.pack( side = LEFT)
+            taglab = Entry(frametag, bd =5)
+            taglab.pack(side = RIGHT)
+
+            Button(div, text='Couleur du conteneur', command=partial(color.getColor)).pack()
+
+
             Button(div, text="Valider", bg="Green", command=partial(ajout_div_fun, widthlab, heightlab, color, div, draw, html, fenetre, toplab, taglab, leftlab, fichier)).pack(side=BOTTOM)
-        div.mainloop()
+            div.mainloop()
     else:
         messagebox.showwarning("Error", "You need to open a file")
 
@@ -137,6 +173,25 @@ def edit_ajout_div_princ(draw, html, w, h, color, fenetre, top, tag, left):
     html_val = html_val.replace(avant, apres)
     html.remplacer(html_val)
 
+def edit_ajout_image_princ(draw, html, w, h, fenetre, top, tag, left, img, gifsdict):
+    print(img)
+    nom = basename(img)
+    nom_sans_ext = os.path.splitext(nom)[0]
+    ext = os.path.splitext(nom)[1]
+
+    imgfile = img
+
+    largeur = fenetre.winfo_screenwidth()*0.6*int(w)/100
+    hauteur = fenetre.winfo_screenheight()*int(h)/100
+    photo = PIL.Image.open(imgfile)
+    resolution = (int(largeur),int(hauteur))
+    img = PIL.ImageTk.PhotoImage(photo.resize(resolution))
+    gifsdict[imgfile] = img
+    draw.create_image(fenetre.winfo_screenwidth()*0.6*(float(left)/100) + largeur/2, fenetre.winfo_screenheight()*(float(top)/100) + hauteur/2, image=img, tags=tag)
+    print(tag)
+    ecrire_image(tag, w, h, top, left, imgfile, html)
+
+
 def ajout_div_princ(div, draw, html, w, h, color, fenetre, top, tag, left, fichier):
     if fichier == "_menu_bar_ew":
         tag += "_menu_bar_ew"
@@ -146,6 +201,10 @@ def ajout_div_princ(div, draw, html, w, h, color, fenetre, top, tag, left, fichi
         html_val = "<div id=\"{0}\" style=\"width:{1}%;background:{2};height:{3}%;position:fixed;top:{4}%;left:{5}%\"></div>\n".format(tag, w, color, h, top, left)
     else:
         html_val = "<div id=\"{0}\" style=\"width:{1}%;background:{2};height:{3}%;position:absolute;top:{4}%;left:{5}%\"></div>\n".format(tag, w, color, h, top, left)
+    html.ecrire(html_val)
+
+def ecrire_image(tag, w, h, top, left, img, html):
+    html_val = "<img id=\"{0}\" style=\"width:{1}%;height:{2}%;position:absolute;top:{3}%;left:{4}%\" src=\"{5}\">\n".format(tag, w, h, top, left, img)
     html.ecrire(html_val)
 
 def ajout_menu_page(fichier, menu, draw, fenetre, html):
@@ -183,7 +242,6 @@ def ajout_menu_page(fichier, menu, draw, fenetre, html):
             menu_html = menu.ret_menu()
             nouv_html += menu_html
 
-            print(nouv_html)
 
             div_liste = re.findall('<div(.*)">', menu_html)
             a_liste = re.findall('<a(.*)</a>', menu_html)
@@ -206,7 +264,6 @@ def ajout_menu_page(fichier, menu, draw, fenetre, html):
 
             for a in a_liste:
                 i=i+1
-                print(a)
                 texte = re.findall('\">(.*)', a)[0]
                 tag = "menu_lien_" + texte
                 draw.create_text(fenetre.winfo_screenwidth()*0.6 - 75*i, fenetre.winfo_screenheight()*0.025, text=texte, tags=tag)
@@ -285,6 +342,117 @@ def supprimer_div(tag, draw, html, id):
     draw.delete(tag)
     html_val = html_val.replace(avant, "")
     html.remplacer(html_val)
+
+def supprimer_image(tag, draw, html):
+    html_val = html.ret_html()
+    reg = "<img id=\"{}\" (.*)>".format(tag)
+    avant = "<img id=\"{}\" ".format(tag) + re.findall(reg, html_val)[0] + ">"
+    draw.delete(tag)
+    html_val = html_val.replace(avant, "")
+    html.remplacer(html_val)
+
+def ajout_image(fenetre, draw, fichier, html, directory, gifsdict):
+    if fichier != "":
+        if fichier == "menu.ew":
+            messagebox.showwarning("Error", "Vous ne pouvez pas ajouter un conteneur au menu")
+        else:
+            div = Toplevel(fenetre)
+
+            framewid = Frame(div)
+            framewid.pack()
+            L1 = Label(framewid, text="Largeur(%)")
+            L1.pack( side = LEFT)
+            widthlab = Entry(framewid, bd =5)
+            widthlab.pack(side = RIGHT)
+
+            framehgt = Frame(div)
+            framehgt.pack()
+            L1 = Label(framehgt, text="Hauteur(%)")
+            L1.pack( side = LEFT)
+            heightlab = Entry(framehgt, bd =5)
+            heightlab.pack(side = RIGHT)
+
+            frametop = Frame(div)
+            frametop.pack()
+            L1 = Label(frametop, text="Marge Top(%)  ")
+            L1.pack( side = LEFT)
+            toplab = Entry(frametop, bd =5)
+            toplab.pack(side = RIGHT)
+
+            frameleft = Frame(div)
+            frameleft.pack()
+            L1 = Label(frameleft, text="Marge Gauche(%)  ")
+            L1.pack( side = LEFT)
+            leftlab = Entry(frameleft, bd =5)
+            leftlab.pack(side = RIGHT)
+
+            frametag = Frame(div)
+            frametag.pack()
+            L1 = Label(frametag, text="ID (Doit être unique)")
+            L1.pack( side = LEFT)
+            taglab = Entry(frametag, bd =5)
+            taglab.pack(side = RIGHT)
+
+            image_sel = image()
+
+            Button(div, text="Selectionner une image", command=partial(importer, image_sel, directory)).pack()
+
+            Button(div, text="Ajouter", command=partial(ajouter_image, fenetre, draw, image_sel, html, directory, div, widthlab, leftlab, toplab, taglab, gifsdict, heightlab)).pack()
+
+            div.mainloop()
+    else:
+        messagebox.showwarning("Error", "Vous devez choisir un fichier")
+
+def importer(image_sel, directory):
+    fichier = askopenfilename()
+    image_sel.set_image(fichier)
+
+def ajouter_image(fenetre, draw, image_sel, html, directory, div, w, left, top, tag, gifsdict, h):
+    tag = tag.get()
+    if top.get() == "":
+        top = 0
+    else:
+        top = top.get()
+    if left.get() == "":
+        left = 0
+    else:
+        left = left.get()
+    if tag != "":
+        if w.get().isdigit():
+            if float(w.get()) != 0:
+                if image_sel.ret_image != "":
+                    w=w.get()
+                    h=h.get()
+                    div.destroy()
+
+                    img = image_sel.ret_image()
+                    nom = basename(image_sel.ret_image())
+                    nom_sans_ext = os.path.splitext(nom)[0]
+                    ext = os.path.splitext(nom)[1]
+                    ran = randint(1,1000000)
+                    nom = nom_sans_ext + str(ran) + ext
+                    copyfile(image_sel.ret_image(), directory + nom)
+
+                    imgfile = directory + nom
+
+                    largeur = fenetre.winfo_screenwidth()*0.6*int(w)/100
+                    hauteur = fenetre.winfo_screenheight()*int(h)/100
+                    photo = PIL.Image.open(imgfile)
+                    resolution = (int(largeur),int(hauteur))
+                    img = PIL.ImageTk.PhotoImage(photo.resize(resolution))
+                    gifsdict[imgfile] = img
+                    draw.create_image(fenetre.winfo_screenwidth()*0.6*(float(left)/100) + largeur/2, fenetre.winfo_screenheight()*(float(top)/100) + hauteur/2, image=img, tags=tag)
+                    print(tag)
+                    ecrire_image(tag, w, h, top, left, imgfile, html)
+                else:
+                    messagebox.showwarning("Error", "Vous devez mettre une image")
+            else:
+                messagebox.showwarning("Error","Weight can't be egal to 0")
+        else:
+            messagebox.showwarning("Error", "You need to insert a integer")
+    else:
+        messagebox.showwarning("Error", "You need to insert an id")
+
 #pas utilisé pour le moment
 def ajout_bouton(fichier, fenetre, draw):
     if fichier != "":

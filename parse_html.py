@@ -1,7 +1,7 @@
 import re
 from edition import *
 
-def parse(fichier, draw, fenetre, html):
+def parse(fichier, draw, fenetre, html, gifsdict):
     with open(fichier, 'r') as mon_fichier:
                 txt = mon_fichier.read()
     body = re.findall(r"<body>(.*)</body>", txt, re.MULTILINE | re.DOTALL)[0]
@@ -11,10 +11,13 @@ def parse(fichier, draw, fenetre, html):
         menu = ""
     debut = re.findall(r"(.*)<body>", txt, re.MULTILINE | re.DOTALL)[0]
     div_liste = re.findall('<div(.*)>', body)
+    img_liste = re.findall('<img(.*)>', body)
     html.reset()
     html.ecrire(debut + "<body>" + body)
 
     draw.delete("all")
+
+
     try:
         for div in div_liste:
             l =  re.findall('left:(.*)%', div)[0]
@@ -24,6 +27,28 @@ def parse(fichier, draw, fenetre, html):
             top = re.findall('top:(.*)%;l', div)[0]
             tag = re.findall('id="(.*)" st', div)[0]
             draw.create_rectangle(fenetre.winfo_screenwidth()*0.6*(float(l)/100), fenetre.winfo_screenheight()*(float(top)/100), fenetre.winfo_screenwidth()*0.6*(float(l)/100) + fenetre.winfo_screenwidth()*0.6*(float(w)/100), fenetre.winfo_screenheight()*(float(top)/100)+fenetre.winfo_screenheight()*(float(h)/100), fill=color, tags=tag)
+
+        for img in img_liste:
+
+            l =  re.findall('left:(.*)%', img)[0]
+            w = re.findall('width:(.*)%;h', img)[0]
+            h = re.findall('height:(.*)%;p', img)[0]
+            top = re.findall('top:(.*)%;l', img)[0]
+            tag = re.findall('id="(.*)" st', img)[0]
+            imgre = re.findall('src="(.*)"', img)[0]
+
+            imgfile = imgre
+
+            largeur = fenetre.winfo_screenwidth()*0.6*int(w)/100
+            hauteur = fenetre.winfo_screenheight()*int(h)/100
+
+            photo = PIL.Image.open(imgfile)
+            resolution = (int(largeur),int(hauteur))
+            img = PIL.ImageTk.PhotoImage(photo.resize(resolution))
+            gifsdict[imgfile] = img
+
+            draw.create_image(fenetre.winfo_screenwidth()*0.6*(float(l)/100) + largeur/2, fenetre.winfo_screenheight()*(float(top)/100) + hauteur/2, image=img, tags=tag)
+
         if menu != "":
             ajout_lien_menu_div(draw, txt, fenetre)
     except:

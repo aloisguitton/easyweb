@@ -20,6 +20,8 @@ class Main(object):
 
         fenetre.geometry("{0}x{1}+0+0".format(fenetre.winfo_screenwidth(), fenetre.winfo_screenheight()))
 
+        self.gifsdict={}
+
         self.directory="./"
         self.fichier_ouvert=""
         self.html = fichier()
@@ -49,8 +51,6 @@ class Main(object):
     def menu(self):
         self.menu = Menu(fenetre)
         self.filemenu = Menu(self.menu, tearoff=0)
-        self.filemenu.add_command(label="Nouvelle page")
-        self.filemenu.add_separator()
         self.filemenu.add_command(label="Sauvegarder", command=self.sauvegarder)
         self.menu.add_cascade(label="Fichier", menu=self.filemenu)
 
@@ -62,6 +62,7 @@ class Main(object):
 
         self.addmenu = Menu(self.menu, tearoff=0)
         self.addmenu.add_command(label="Ajouter un conteneur", command=partial(ajout_div, fenetre, (self.draw), (self.fichier_ouvert), (self.html), (self.html_menu)))
+        self.addmenu.add_command(label="Ajouter une image", command=partial(ajout_image, fenetre, self.draw, self.fichier_ouvert, self.html, self.directory, self.gifsdict))
         self.menu.add_cascade(label="Ajouter", menu=self.addmenu)
 
         fenetre.config(menu=self.menu)
@@ -83,8 +84,9 @@ class Main(object):
 
     def sel_fich(self, fichier):
         self.fichier_ouvert=fichier
-        parse(fichier, (self.draw), fenetre, self.html)
+        parse(fichier, (self.draw), fenetre, self.html, self.gifsdict)
         self.addmenu.entryconfigure(0, command=partial(ajout_div, fenetre, (self.draw), (self.fichier_ouvert), (self.html), (self.html_menu)))
+        self.addmenu.entryconfigure(1, command=partial(ajout_image, fenetre, self.draw, self.fichier_ouvert, self.html, self.directory, self.gifsdict))
         self.menumenu.entryconfigure(1, command=partial(ajouter_lien_menu, fenetre, (self.fichier_ouvert), self.directory, self.html_menu, self.draw))
         self.menumenu.entryconfigure(2, command=partial(ajout_menu_page, (self.fichier_ouvert), (self.html_menu), (self.draw), fenetre, self.html))
 
@@ -92,6 +94,7 @@ class Main(object):
         parse_menu(self.html_menu, (self.draw), fenetre)
         self.fichier_ouvert = "menu.ew"
         self.addmenu.entryconfigure(0, command=partial(ajout_div, fenetre, (self.draw), (self.fichier_ouvert), (self.html), (self.html_menu)))
+        self.addmenu.entryconfigure(1, command=partial(ajout_image, fenetre, self.draw, self.fichier_ouvert, self.html, self.directory, self.gifsdict))
         self.menumenu.entryconfigure(1, command=partial(ajouter_lien_menu, fenetre, (self.fichier_ouvert), self.directory, self.html_menu, self.draw))
         self.menumenu.entryconfigure(2, command=partial(ajout_menu_page, (self.fichier_ouvert), (self.html_menu), (self.draw), fenetre, self.html))
 
@@ -105,6 +108,7 @@ class Main(object):
         self.arbor.pack(side=LEFT, padx=5, pady=5)
 
         Button(self.arbor, text="Selectionner un dossier", command=partial(self.sel_dossier)).pack()
+
 
         self.paned.add(self.arbor, width=fenetre.winfo_screenwidth()*0.2)
 
@@ -136,7 +140,7 @@ class Main(object):
 
         #try sur clic dans fenetre pour savoir si clic sur un div par exemple
         #try:
-        afficher(self.prop_pan, self.draw, fenetre, self.draw, self.html, self.html_menu, self.directory, self.fichier_ouvert)
+        afficher(self.prop_pan, self.draw, fenetre, self.draw, self.html, self.html_menu, self.directory, self.fichier_ouvert, self.gifsdict)
         #except:
         #    print("error")
 
