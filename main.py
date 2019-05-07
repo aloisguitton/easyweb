@@ -63,6 +63,7 @@ class Main(object):
         self.addmenu = Menu(self.menu, tearoff=0)
         self.addmenu.add_command(label="Ajouter un conteneur", command=partial(ajout_div, fenetre, (self.draw), (self.fichier_ouvert), (self.html), (self.html_menu)))
         self.addmenu.add_command(label="Ajouter une image", command=partial(ajout_image, fenetre, self.draw, self.fichier_ouvert, self.html, self.directory, self.gifsdict))
+        self.addmenu.add_command(label="Ajouter du texte", command=partial(ajout_texte, fenetre, self.draw, self.fichier_ouvert, self.html, self.directory, self.prin_pan))
         self.menu.add_cascade(label="Ajouter", menu=self.addmenu)
 
         fenetre.config(menu=self.menu)
@@ -87,6 +88,7 @@ class Main(object):
         parse(fichier, (self.draw), fenetre, self.html, self.gifsdict)
         self.addmenu.entryconfigure(0, command=partial(ajout_div, fenetre, (self.draw), (self.fichier_ouvert), (self.html), (self.html_menu)))
         self.addmenu.entryconfigure(1, command=partial(ajout_image, fenetre, self.draw, self.fichier_ouvert, self.html, self.directory, self.gifsdict))
+        self.addmenu.entryconfigure(2, command=partial(ajout_texte, fenetre, self.draw, self.fichier_ouvert, self.html, self.directory, self.prin_pan))
         self.menumenu.entryconfigure(1, command=partial(ajouter_lien_menu, fenetre, (self.fichier_ouvert), self.directory, self.html_menu, self.draw))
         self.menumenu.entryconfigure(2, command=partial(ajout_menu_page, (self.fichier_ouvert), (self.html_menu), (self.draw), fenetre, self.html))
 
@@ -95,6 +97,7 @@ class Main(object):
         self.fichier_ouvert = "menu.ew"
         self.addmenu.entryconfigure(0, command=partial(ajout_div, fenetre, (self.draw), (self.fichier_ouvert), (self.html), (self.html_menu)))
         self.addmenu.entryconfigure(1, command=partial(ajout_image, fenetre, self.draw, self.fichier_ouvert, self.html, self.directory, self.gifsdict))
+        self.addmenu.entryconfigure(2, command=partial(ajout_texte, fenetre, self.draw, self.fichier_ouvert, self.html, self.directory, self.prin_pan))
         self.menumenu.entryconfigure(1, command=partial(ajouter_lien_menu, fenetre, (self.fichier_ouvert), self.directory, self.html_menu, self.draw))
         self.menumenu.entryconfigure(2, command=partial(ajout_menu_page, (self.fichier_ouvert), (self.html_menu), (self.draw), fenetre, self.html))
 
@@ -159,6 +162,7 @@ class Main(object):
             self.draw.move(CURRENT, event.x - self.lastx, event.y - self.lasty)
             self.lastx = event.x
             self.lasty = event.y
+            afficher(self.prop_pan, self.draw, fenetre, self.draw, self.html, self.html_menu, self.directory, self.fichier_ouvert, self.gifsdict)
 
     def principale(self):
         #self.paned.add(Label(self.paned, text='Main', background='red', anchor=CENTER), width=fenetre.winfo_screenwidth()*0.6)

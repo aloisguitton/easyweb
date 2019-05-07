@@ -15,8 +15,6 @@ def afficher(prop_frame, obj, fenetre, draw, html, menu, chemin, fichier, gifsdi
 
     Label(prop_frame, text=tag).pack()
 
-    print("fichier::::::::::::::" + fichier)
-
     if type == "rectangle":
         res = re.search("menu_bar_", tag)
         res2 = re.search("menu.ew", fichier)
@@ -75,6 +73,7 @@ def afficher(prop_frame, obj, fenetre, draw, html, menu, chemin, fichier, gifsdi
                 Button(prop_frame, text="Supprimer", command=partial(supprimer_div, tag, draw, menu, 0)).pack()
             else:
                 Button(prop_frame, text="Supprimer", command=partial(supprimer_div, tag, draw, html, 1)).pack()
+
     elif type == "text":
         res = re.search("menu_lien_", tag)
         res2 = re.search("menu.ew", fichier)
@@ -101,6 +100,42 @@ def afficher(prop_frame, obj, fenetre, draw, html, menu, chemin, fichier, gifsdi
             combo.pack(side=LEFT)
 
             Button(prop_frame, text="Mettre à jour le lien", command=partial(mise_jour_lien, nom, combo, menu, ancien_tag, draw, fenetre)).pack()
+        else:
+            coor = obj.coords(CURRENT)
+            text_html = re.findall('<a id=\"{}\"(.*)>'.format(tag), html.ret_html())[0]
+
+            framenom = Frame(prop_frame)
+            texte = draw.itemcget(tag, 'text')
+            framenom.pack()
+            Label(framenom, text="Texte :").pack()
+            zone_text = Text(framenom)
+            zone_text.delete("1.0",END)
+            zone_text.insert(END, texte)
+            zone_text.bind("<Key>", partial(maj_texte, draw, zone_text, tag))
+            zone_text.pack()
+
+            frameml = Frame(prop_frame)
+            frameml.pack()
+            l = StringVar()
+            Label(frameml, text="Margin left (%): ").pack(side=LEFT)
+            Entry(frameml, textvariable=l).pack(side=LEFT)
+            l.set(int(int(coor[0])/fenetre.winfo_screenwidth()*(100/60)*100))
+
+            framemt = Frame(prop_frame)
+            framemt.pack()
+            t = StringVar()
+            Label(framemt, text="Marge haute (%): ").pack(side=LEFT)
+            Entry(framemt, textvariable=t).pack(side=LEFT)
+            t.set(int(int(coor[1])/fenetre.winfo_screenheight()*100))
+
+            framewd = Frame(prop_frame)
+            framewd.pack()
+            w = StringVar()
+            Label(framewd, text="Largeur (%): ").pack(side=LEFT)
+            Entry(framewd, textvariable=w).pack(side=LEFT)
+            w.set(re.findall('max-width:(.*)%;o', text_html)[0])
+
+            Button(prop_frame, text="Valider", command=partial(edit_texte, zone_text, l, t, w, draw, html, tag, fenetre)).pack()
 
     elif type == "image":
 
@@ -151,8 +186,6 @@ def afficher(prop_frame, obj, fenetre, draw, html, menu, chemin, fichier, gifsdi
         Button(prop_frame, text="Valider", command=partial(edit_image, w, h, t, l, tag, draw, fenetre, html, menu, img, gifsdict)).pack()
 
         Button(prop_frame, text="Supprimer", command=partial(supprimer_image, tag, draw, html)).pack()
-
-
 
     else:
         coor = obj.coords(CURRENT)

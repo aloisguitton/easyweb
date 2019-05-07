@@ -1,4 +1,12 @@
-from tkinter import tix
+from tkinter import *
+
+root = Tk()
+
+def key(event):
+    print ("pressed", repr(event.char))
 
 
-root = tix.Tk()
+e = Text(root)
+e.bind("<Key>", key)
+e.pack()
+root.mainloop()

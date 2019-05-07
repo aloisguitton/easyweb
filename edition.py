@@ -95,7 +95,6 @@ def edit_image(w, h, top, left, tag, draw, fenetre, html, menu, img, gifsdict):
                     if float(h.get()) != 0:
                         draw.delete(tag)
                         edit_ajout_image_princ(draw, html, w.get(), h.get(), fenetre, top, tag, left, img, gifsdict)
-                        print("edition")
                     else:
                         messagebox.showwarning("Error","Height can't be egal to 0")
                 else:
@@ -188,9 +187,7 @@ def edit_ajout_image_princ(draw, html, w, h, fenetre, top, tag, left, img, gifsd
     img = PIL.ImageTk.PhotoImage(photo.resize(resolution))
     gifsdict[imgfile] = img
     draw.create_image(fenetre.winfo_screenwidth()*0.6*(float(left)/100) + largeur/2, fenetre.winfo_screenheight()*(float(top)/100) + hauteur/2, image=img, tags=tag)
-    print(tag)
     ecrire_image(tag, w, h, top, left, imgfile, html)
-
 
 def ajout_div_princ(div, draw, html, w, h, color, fenetre, top, tag, left, fichier):
     if fichier == "_menu_bar_ew":
@@ -329,6 +326,92 @@ def ajout_lien_menu_div(draw, html, fenetre):
         # draw.create_text(fenetre.winfo_screenwidth()*0.6 - 75*i, fenetre.winfo_screenheight()*0.025, text=texte, activefill=couleur, tags=tag)
         draw.create_text(fenetre.winfo_screenwidth()*0.6 - 75*i, fenetre.winfo_screenheight()*0.025, text=texte, tags=tag)
 
+def ajout_texte(fenetre, draw, fichier, html, directory, prin_pan):
+    color = selcolor()
+    if fichier != "":
+        if fichier == "menu.ew":
+            messagebox.showwarning("Error", "Vous ne pouvez pas ajouter un texte au menu")
+        else:
+            div = Toplevel(fenetre)
+            framewid = Frame(div)
+            framewid.pack()
+            L1 = Label(framewid, text="Largeur(%)")
+            L1.pack( side = LEFT)
+            widthlab = Entry(framewid, bd =5)
+            widthlab.pack(side = RIGHT)
+
+            frametop = Frame(div)
+            frametop.pack()
+            L1 = Label(frametop, text="Marge Top(%)  ")
+            L1.pack( side = LEFT)
+            toplab = Entry(frametop, bd =5)
+            toplab.pack(side = RIGHT)
+
+            frameleft = Frame(div)
+            frameleft.pack()
+            L1 = Label(frameleft, text="Marge Gauche(%)  ")
+            L1.pack( side = LEFT)
+            leftlab = Entry(frameleft, bd =5)
+            leftlab.pack(side = RIGHT)
+
+            frametag = Frame(div)
+            frametag.pack()
+            L1 = Label(frametag, text="ID (Doit être unique)")
+            L1.pack( side = LEFT)
+            taglab = Entry(frametag, bd =5)
+            taglab.pack(side = RIGHT)
+
+            framemt = Frame(div)
+            framemt.pack()
+            L1 = Label(framemt, text="Texte :")
+            L1.pack()
+            textelab = Text(framemt, bd =5)
+            textelab.pack()
+
+            Button(div, text='Couleur du fond', command=partial(color.getColor)).pack()
+
+
+            Button(div, text="Valider", command=partial(ajout_texte_fun, widthlab, textelab, color, div, draw, html, fenetre, toplab, taglab, leftlab, fichier)).pack(side=BOTTOM)
+            div.mainloop()
+    else:
+        messagebox.showwarning("Error", "You need to open a file")
+
+def ajout_texte_fun(w, texte, color, div, draw, html, fenetre, top, tag, left, fichier):
+    color_value = color.ret_color()
+    if top.get() == "":
+        top = 0
+    else:
+        top = top.get()
+
+    if left.get() == "":
+        left = 0
+    else:
+        left = left.get()
+    if color_value == None:
+        color_value = "#FFFFFF"
+    if tag.get() != "":
+        tag = tag.get()
+        if w.get().isdigit():
+            if float(w.get()) != 0:
+                w=w.get()
+                texte=texte.get("1.0",END)
+                div.destroy()
+
+                largeur = fenetre.winfo_screenwidth()*0.6*int(w)/100
+
+                draw.create_text(fenetre.winfo_screenwidth()*0.6*(float(left)/100), fenetre.winfo_screenheight()*(float(top)/100), anchor="nw", tags=tag, text=texte, width=largeur)
+
+                html_val = "<a id=\"{}\" style=\"margin-top:{}%;position:absolute;left:{}%;max-width:{}%;overflow-wrap:break-word;\">{}</a>".format(tag, top, left, w, texte)
+                html_val = html_val.replace("\n", "<br>")
+
+                html.ecrire(html_val)
+            else:
+                messagebox.showwarning("Error","Weight can't be egal to 0")
+        else:
+            messagebox.showwarning("Error", "You need to insert a integer")
+    else:
+        messagebox.showwarning("Error", "You need to insert an id")
+
 #si id = 0 alors menu si id=1 alors pas menu
 def supprimer_div(tag, draw, html, id):
     if id == 0:
@@ -452,6 +535,33 @@ def ajouter_image(fenetre, draw, image_sel, html, directory, div, w, left, top, 
             messagebox.showwarning("Error", "You need to insert a integer")
     else:
         messagebox.showwarning("Error", "You need to insert an id")
+
+def maj_texte(draw, zone_text, tag, event):
+    draw.itemconfigure(tag, text=zone_text.get("1.0",END))
+
+def edit_texte(zone_text, l, t, w, draw, html, tag, fenetre):
+    if t.get() == "":
+        t = 0
+    else:
+        t = str(t.get())
+    if l.get() == "":
+        l = 0
+    else:
+        l = str(l.get())
+    if w.get().isdigit():
+        if float(w.get()) != 0:
+            w = str(w.get())
+            draw.delete(tag)
+            draw.create_text(fenetre.winfo_screenwidth()*0.6*(float(l)/100), fenetre.winfo_screenheight()*(float(t)/100), anchor="nw", tags=tag, text=zone_text.get("1.0",END), width=fenetre.winfo_screenwidth()*0.6*(float(w)/100))
+            html_val = html.ret_html()
+            avant = re.findall('<a id="{}" style="(.*)</a>'.format(tag), html_val)[0]
+            apres = "margin-top:{}%;position:absolute;left:{}%;max-width:{}%;overflow-wrap:break-word;\">{}".format(t, l, w, zone_text.get("1.0",END).replace("\n", "<br>"))
+            html_val = html_val.replace(avant, apres)
+            html.remplacer(html_val)
+        else:
+            messagebox.showwarning("Error","Weight can't be egal to 0")
+    else:
+        messagebox.showwarning("Error", "You need to insert a integer")
 
 #pas utilisé pour le moment
 def ajout_bouton(fichier, fenetre, draw):

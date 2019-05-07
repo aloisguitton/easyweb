@@ -10,8 +10,11 @@ def parse(fichier, draw, fenetre, html, gifsdict):
     except:
         menu = ""
     debut = re.findall(r"(.*)<body>", txt, re.MULTILINE | re.DOTALL)[0]
+
     div_liste = re.findall('<div(.*)>', body)
     img_liste = re.findall('<img(.*)>', body)
+    a_liste = re.findall('<a id(.*)>', body)
+
     html.reset()
     html.ecrire(debut + "<body>" + body)
 
@@ -49,7 +52,20 @@ def parse(fichier, draw, fenetre, html, gifsdict):
 
             draw.create_image(fenetre.winfo_screenwidth()*0.6*(float(l)/100) + largeur/2, fenetre.winfo_screenheight()*(float(top)/100) + hauteur/2, image=img, tags=tag)
 
+        for texte in a_liste:
+            tag = re.findall('="(.*)" sty', texte)[0]
+            t = re.findall('margin-top:(.*)%;p', texte)[0]
+            l = re.findall('left:(.*)%;m', texte)[0]
+            w = re.findall('max-width:(.*)%;o', texte)[0]
+            txt_aff = re.findall('">(.*)</a', texte)[0]
+
+
+            txt_aff = txt_aff.replace("<br>", "\n")
+
+            draw.create_text(fenetre.winfo_screenwidth()*0.6*(float(l)/100), fenetre.winfo_screenheight()*(float(t)/100), anchor="nw", tags=tag, text=txt_aff, width=fenetre.winfo_screenwidth()*0.6*(float(w)/100))
+
         if menu != "":
+            print("ici")
             ajout_lien_menu_div(draw, txt, fenetre)
     except:
         pass
